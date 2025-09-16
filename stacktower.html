@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Stack Tower Clicker</title>
+  <style>
+    body {
+      margin: 0;
+      background: #222;
+      color: white;
+      text-align: center;
+      font-family: sans-serif;
+    }
+    canvas {
+      display: block;
+      margin: auto;
+      border: 2px solid white;
+    }
+    h1 {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Stack Tower Clicker</h1>
+  <div id="score">Score: 0</div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+  <script>
+    let stack = [];
+    let movingBlock;
+    let direction = 1;
+    let speed = 2;
+    let blockWidth = 100;
+    let blockHeight = 20;
+    let level = 0;
+    let gameOver = false;
+
+    function setup() {
+      createCanvas(400, 600);
+      frameRate(60);
+      initBlock();
+    }
+
+    function draw() {
+      background(30);
+
+      // Draw stack
+      for (let i = 0; i < stack.length; i++) {
+        fill(255 - i * 10, 100 + i * 5, 150);
+        rect(stack[i].x, height - (i + 1) * blockHeight, stack[i].w, blockHeight);
+      }
+
+      // Draw moving block
+      if (!gameOver) {
+        fill(100, 255, 150);
+        rect(movingBlock.x, height - (stack.length + 1) * blockHeight, movingBlock.w, blockHeight);
+
+        movingBlock.x += direction * speed;
+        if (movingBlock.x <= 0 || movingBlock.x + movingBlock.w >= width) {
+          direction *= -1;
+        }
+      } else {
+        fill(255, 50, 50);
+        textSize(32);
+        text("Game Over", width / 2, height / 2);
+        textSize(16);
+        text("Refresh to play again", width / 2, height / 2 + 30);
+      }
+    }
+
+    function mousePressed() {
+      if (gameOver) return;
+
+      let y = height - (stack.length + 1) * blockHeight;
+
+      if (stack.length === 0) {
+        stack.push({ x: movingBlock.x, w: movingBlock.w });
+      } else {
+        let prev = stack[stack.length - 1];
+        let diff = movingBlock.x - prev.x;
+
+        if (abs(diff) > movingBlock.w) {
+          gameOver = true;
+          return;
+        }
+
+        // Cut the overlapping part
+        movingBlock.w -= abs(diff);
+        if (diff > 0) movingBlock.x = prev.x + diff;
+        else movingBlock.x = prev.x;
+
+        stack.push({ x: movingBlock.x, w: movingBlock.w });
+      }
+
+      document.getElementById('score').innerText = 'Score: ' + stack.length;
+      speed += 0.3;
+      initBlock();
+    }
+
+    function initBlock() {
+      movingBlock = {
+        x: 0,
+        w: blockWidth
+      };
+    }
+  </script>
+</body>
+</html>
